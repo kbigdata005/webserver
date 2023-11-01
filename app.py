@@ -1,16 +1,27 @@
-from flask import Flask , request
+from flask import Flask , request ,render_template ,redirect,session
 import argparse
 from pymongo import MongoClient
 from passlib.hash import pbkdf2_sha256
+import json
+from functools import wraps
 
 app = Flask(__name__)
+app.secret_key='ubion8'
 
 client = MongoClient('mongodb+srv://root:1234@mydb.vqrlsdn.mongodb.net/?retryWrites=true&w=majority')
 #create schema 
 db = client.mylist
 # print("TEST2")
 
-
+def is_logged_in(f):
+    @wraps(f)
+    def wrap(*args , **kwargs):
+        if 'is_logged' in session:
+            return f(*args , **kwargs)
+        
+        else:
+            return redirect('/login')
+    return wrap
 
 @app.route("/", methods=['GET', 'POST'])
 def main():
@@ -18,24 +29,17 @@ def main():
         return "Hello"
     elif request.method =='POST':
         return "안녕"
-
+    
+@app.route("/auth", methods=['GET', 'POST'])
+@is_logged_in
+def auth():
+    return "Success your Auth"
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
-        #create document
-        # users = db.users
-        # username = request.args['username']
-        # email = request.args.get('email')
-        # password = request.args.get('password')
-        # password_hash = pbkdf2_sha256.hash(password)
-        # # print(username)
-        # users.insert_one({
-        #     "username":username,
-        #     "email" : email,
-        #     "password":password_hash
-        # })
-        return "Hello"
+        return render_template('register.html')
+    
     elif request.method =='POST':
         #create document
         users = db.users
@@ -43,15 +47,46 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         password_hash = pbkdf2_sha256.hash(password)
-        # print(username)
-        users.insert_one({
-            "username":username,
-            "email" : email,
-            "password":password_hash
-        })
-        return "안녕"
-    
 
+        user = users.find_one({'email': email})
+        if user:
+            return redirect('/register')
+        # print(username)
+        else:
+            users.insert_one({
+                "username":username,
+                "email" : email,
+                "password":password_hash
+            })
+            return redirect('/login')
+
+
+@app.route('/login', methods=['GET', 'POST'])   
+def login():
+    if request.method =='POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        # email 조회 및 password verify
+        users = db.users
+        result = users.find_one({'email': email})
+        print(result)
+        if result:
+            pw = result['password']
+
+            auth = pbkdf2_sha256.verify(password , pw )
+            print(auth)
+            if auth == True:
+                session['username'] = result['username']
+                session['is_logged'] = True
+                return "Success"
+            else:
+                return "Login Failed"
+        else:
+            return "Not Founded User"
+        
+    elif request.method == "GET":
+        return render_template('login.html')
 
 # 인자값을 받을 수 있는 인스턴스 생성
 parser = argparse.ArgumentParser(description='사용법 테스트입니다.')
