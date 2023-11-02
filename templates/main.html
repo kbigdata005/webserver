@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>main</title>
+</head>
+<body>
+    메인페이지
+
+    {% if session %}
+    <h3> {{ session['username'] }} 님 반갑습니다. </h3>
+
+    {% else %}
+    <h3> GUEST님 반갑습니다. </h3>
+
+    {% endif %}
+</body>
+</html>

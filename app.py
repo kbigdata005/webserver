@@ -25,10 +25,8 @@ def is_logged_in(f):
 
 @app.route("/", methods=['GET', 'POST'])
 def main():
-    if request.method == 'GET':
-        return "Hello"
-    elif request.method =='POST':
-        return "안녕"
+    name="김태경"
+    return render_template('main.html', data = name )
     
 @app.route("/auth", methods=['GET', 'POST'])
 @is_logged_in
