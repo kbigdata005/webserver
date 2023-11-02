@@ -86,6 +86,11 @@ def login():
     elif request.method == "GET":
         return render_template('login.html')
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')
+
 # 인자값을 받을 수 있는 인스턴스 생성
 parser = argparse.ArgumentParser(description='사용법 테스트입니다.')
 
