@@ -77,11 +77,11 @@ def login():
             if auth == True:
                 session['username'] = result['username']
                 session['is_logged'] = True
-                return "Success"
+                return redirect('/')
             else:
-                return "Login Failed"
+                return redirect('/login')
         else:
-            return "Not Founded User"
+            return redirect('/login')
         
     elif request.method == "GET":
         return render_template('login.html')
