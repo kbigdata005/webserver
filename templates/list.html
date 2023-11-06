@@ -42,10 +42,14 @@
                                 {% for i in data %}
                                 <tr>
                                     <td>{{ loop.index }}</td>
-                                    <td>{{ i['title'] }} </td>
+                                    <td><a href="/detail/{{ i['_id'] }}">{{ i['title'] }}</a> </td>
                                     <td>{{ i['desc'] }}</td>
                                     <td> {{ i['author'] }}</td>
-                                    <td> edit / delete</td>
+                                    <td> 
+                                        <a href="/edit/{{ i['_id'] }}"><button class="btn btn-success">Edit</button></a>
+                                        <a href="/delete/{{ i['_id'] }}"><button class="btn btn-danger">Delete</button></a>
+
+                                    </td>
                                     
                                 </tr>
                                 {% endfor %}

@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from passlib.hash import pbkdf2_sha256
 import json
 from functools import wraps
+import bson
 
 app = Flask(__name__)
 app.secret_key='ubion8'
@@ -116,6 +117,41 @@ def create():
                 "author":author
             })
         return redirect('/list')
+
+# ids 를 parameter 처리
+@app.route('/detail/<list_id>')
+def detail(list_id):
+    lists = db.lists
+    result = lists.find_one({'_id':bson.ObjectId(list_id)})
+    print(result)
+    return render_template('detail.html', data=result)
+
+
+@app.route('/edit/<list_id>' , methods=['GET', 'POST'])
+def edit(list_id):
+    if request.method == 'GET':
+        lists = db.lists
+        result = lists.find_one({'_id':bson.ObjectId(list_id)})
+        print(result)
+        return render_template('edit.html', data=result)
+    elif request.method == 'POST':
+        lists = db.lists
+        title = request.form['title']
+        desc = request.form.get('desc')
+        author = request.form.get('author')
+        lists.update_one(
+            {'_id' : bson.ObjectId(list_id)},
+            {"$set": {
+                "title":title,
+                "desc" : desc,
+                "author":author
+            }},
+            upsert=False
+
+            )
+        
+        return redirect('/list')
+
 
 # 인자값을 받을 수 있는 인스턴스 생성
 parser = argparse.ArgumentParser(description='사용법 테스트입니다.')
