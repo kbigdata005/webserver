@@ -94,7 +94,28 @@ def logout():
 @app.route('/list')
 # @is_logged_in
 def list():
-    return render_template('list.html')
+    lists = db.lists
+    results = lists.find()
+    # for i in results:
+    #     print(i)
+    return render_template('list.html', data = results )
+
+@app.route('/create', methods=['GET', 'POST'])
+def create():
+    if request.method == "GET":
+        return render_template('create.html')
+    else:
+        #create document
+        lists = db.lists
+        title = request.form['title']
+        desc = request.form.get('desc')
+        author = request.form.get('author')
+        lists.insert_one({
+                "title":title,
+                "desc" : desc,
+                "author":author
+            })
+        return redirect('/list')
 
 # 인자값을 받을 수 있는 인스턴스 생성
 parser = argparse.ArgumentParser(description='사용법 테스트입니다.')
