@@ -24,6 +24,16 @@ def is_logged_in(f):
             return redirect('/login')
     return wrap
 
+def is_admin(f):
+    @wraps(f)
+    def wrap(*args , **kwargs):
+        if 'is_admin' in session:
+            return f(*args , **kwargs)
+        
+        else:
+            return redirect('/')
+    return wrap
+
 @app.route("/", methods=['GET', 'POST'])
 def main():
     name="김태경"
@@ -78,6 +88,8 @@ def login():
             if auth == True:
                 session['username'] = result['username']
                 session['is_logged'] = True
+                if result['email'] == "admin@naver.com":
+                    session['is_admin'] = True
                 return redirect('/')
             else:
                 return redirect('/login')
@@ -152,6 +164,13 @@ def edit(list_id):
         
         return redirect('/list')
 
+@app.route('/delete/<list_id>')
+@is_logged_in
+@is_admin
+def delete(list_id):
+    lists = db.lists
+    lists.delete_one({"_id": bson.ObjectId(list_id) })
+    return redirect('/list')
 
 # 인자값을 받을 수 있는 인스턴스 생성
 parser = argparse.ArgumentParser(description='사용법 테스트입니다.')
